@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Display DNS record information for the requested domain subdomains.
+
+get_record() {
+	local subdomain="$1"
+	local domain="$2"
+	local answer
+
+	answer=$(dig +noall +answer "${subdomain}.${domain}" | awk 'NR == 1 { print $4, $5 }')
+	record_type=$(printf '%s\n' "$answer" | awk '{ print $1 }')
+	destination=$(printf '%s\n' "$answer" | awk '{ print $2 }')
+	printf 'The subdomain %s is a %s record and points to %s\n' "$subdomain" "$record_type" "$destination"
+}
+
+if [ "$#" -eq 2 ]; then
+	get_record "$2" "$1"
+else
+	for subdomain in www lb-01 web-01 web-02; do
+		get_record "$subdomain" "$1"
+	done
+fi
